@@ -50,4 +50,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(AdoptionMatch::class);
     }
+
+    public function image()
+    {
+        return $this->morphOne(
+            Images::class,
+            'imageable'
+        );
+    }
 }

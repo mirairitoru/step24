@@ -11,14 +11,17 @@
         </span>
     </p>
 @else
-    <div class="grid grid-cols-3 mx-auto gap-8">
+    <div class="grid grid-cols-2 md:grid-cols-3 mx-auto gap-8">
         @foreach ($animals as $animal)
             @if($animal->adoption_status === '募集中')
                 <div class="border border-black p-4 text-center shadow-lg rounded-lg">
-                    <div class="bg-gray-200 h-40 flex items-center justify-center">
-                        イメージ
-                    </div>
-
+                    @if($animal->topImage())
+                        <img src="{{ asset('storage/' .$animal->topImage()->path) }}" alt="イメージ" class="w-full h-40 object-cover rounded">
+                    @else
+                        <div class="bg-gray-200 h-40 flex items-center justify-center">
+                            画像なし
+                        </div>
+                    @endif
                     <div class="mt-4 space-y-2">
                         <p class="grid grid-cols-3">
                             <span class="text-left">名前:</span>

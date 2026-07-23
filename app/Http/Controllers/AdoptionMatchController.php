@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UpdateMatchStatusRequest;
 use App\Models\AdoptionMatch;
 use App\Models\Animal;
+use App\Models\Chat;
 use App\Models\Favorite;
-use App\Models\Matche;
+use App\Notifications\CompleteNotification;
+use App\Notifications\MatchNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -24,6 +26,11 @@ class AdoptionMatchController extends Controller
             $orgUser->id
         )
         ->where('adoption_status', '募集中')
+        ->with([
+            'images' => function($q) {
+                $q->orderBy('sort_order');
+            }
+        ])
         ->withCount([
             'favorites as favorites_count' => function($query) {
                 $query->where('status', 'pending');
@@ -34,13 +41,36 @@ class AdoptionMatchController extends Controller
         })
         ->get();
 
-        $selectedAnimalId = $request->animal_id ?? $animals->first()?->id;
-        $selectedAnimal = Animal::find($selectedAnimalId);
+        if($animals->isEmpty()) {
+            return view('org.favorite.index', [
+                'animals' => $animals,
+                'selectedAnimal' => null,
+                'favoritedUsers' => collect(),
+                'noAnimals' => true,
+            ]);
+        }
+
+        if(!$request->animal_id) {
+            return view('org.favorite.index', [
+                'animals' => $animals,
+                'selectedAnimal' => null,
+                'favoritedUsers' => collect(),
+                'noAnimals' => false,
+            ]);
+        }
+
+        $selectedAnimal = Animal::with([
+            'images' => function($q) {
+                $q->orderBy('sort_order');
+            }
+        ])->find($request->animal_id);
 
         $favoritedUsers = $selectedAnimal
             ? $selectedAnimal->favorites()
                 ->where('status', 'pending')
-                ->with('user')
+                ->with([
+                    'user.image'
+                ])
                 ->paginate(3)
             : collect();
         
@@ -60,22 +90,82 @@ class AdoptionMatchController extends Controller
             // 自分の投稿した動物のみ
         $animals = Animal::where('organization_id', $orgUser->id)
             ->where('adoption_status', 'マッチ中')
-            ->with('matche')
+            ->with([
+                'matche',
+                'images' => function($q) {
+                    $q->orderBy('sort_order');
+                }
+            ])
             ->get();
 
-        // 選択された動物(なければ最初)
-        $selectedAnimalId = $request->animal_id ?? $animals->first()?->id;
+        // マッチ中の動物が0匹
+        if($animals->isEmpty()) {
+            return view('org.match.index', [
+                'animals' => $animals,
+                'selectedAnimal' => null,
+                'matchedUsers' => collect(),
+                'noAnimals' => true,
+            ]);
+        }
+
+        if(!$request->animal_id) {
+            return view('org.match.index', [
+                'animals' => $animals,
+                'selectedAnimal' => null,
+                'matchedUsers' => collect(),
+                'noAnimals' => false,
+            ]);
+        }
 
         $selectedAnimal = Animal::where('organization_id', $orgUser->id)
-            ->with(['matche.user'])
-            ->find($selectedAnimalId);
+            ->with([
+                'matche.user',
+                'matche.chat.messages',
+                'images' => function($q) {
+                    $q->orderBy('sort_order');
+                }
+            ])
+            ->find($request->animal_id);
 
-        $matchedUsers = $selectedAnimal?->matche;
+        $matchedUsers = $selectedAnimal?->matche ?? collect();
+
+        // 進行状況
+        $timelines = [];
+        if($selectedAnimal) {
+            foreach($matchedUsers as $match) {
+                $timelines[] = [
+                    'date' => $match->created_at,
+                    'text' => 'マッチが成立しました',
+                ];
+
+                foreach($match->chat->messages as $message) {
+                    $timelines[] = [
+                        'date' => $message->created_at,
+                        'text' => $message->sender_type === 'user'
+                            ? $match->user->nickname . 'さんがチャットを送信しました'
+                            : '保護団体がチャットを送信しました',
+                    ];
+                }
+
+                if($match->status === '譲渡完了') {
+                    $timelines[] = [
+                        'date' => $match->updated_at,
+                        'text' => '譲渡完了になりました',
+                    ];
+                }
+            }
+        }
+
+        $timelines = collect($timelines)
+            ->sortByDesc('date')
+            ->values()
+            ->all();
 
         return view('org.match.index', compact(
             'animals',
             'selectedAnimal',
             'matchedUsers',
+            'timelines',
         ));
     }
 
@@ -99,10 +189,15 @@ class AdoptionMatchController extends Controller
                 'status' => 'matched',
             ]);
 
-            AdoptionMatch::create([
+            $match = AdoptionMatch::create([
                 'user_id' => $favorite->user_id,
                 'animal_id' => $favorite->animal_id,
                 'status' => '譲渡準備中',
+            ]);
+
+            Chat::create([
+                'match_id' => $match->id,
+                'status' => 'active',
             ]);
 
             $animal->update([
@@ -114,6 +209,15 @@ class AdoptionMatchController extends Controller
                 ->update([
                     'status' => 'cancelled',
                 ]);
+
+            $organization = $animal->organization;
+
+            $organization->notify(
+                new MatchNotification(
+                    $favorite->user,
+                    $animal
+                )
+            );
         });
 
         return back()->with('match_success', 'マッチ承認しました。');
@@ -139,6 +243,15 @@ class AdoptionMatchController extends Controller
                 $animal->update([
                     'adoption_status' => '譲渡完了'
                 ]);
+
+                $organization = $animal->organization;
+
+                $organization->notify(
+                    new CompleteNotification(
+                        $match->user,
+                        $animal,
+                    )
+                );
             }
         }
 

@@ -8,6 +8,7 @@
     data-animal_care_experience="{{ $match->user->animal_care_experience }}"
     data-animal_care_details="{{ $match->user->animal_care_details }}"
     data-self_introduction="{{ $match->user->self_introduction }}"
+    data-image="{{ $match->user->image ? asset('storage/' .$match->user->image->path) : ''}}"
 >
     ユーザー詳細
 </button>

@@ -7,13 +7,13 @@
                 x
             </button>
             <h2 class="text-2xl font-bold text-center mb-6">
-                マッチが成立しました❤
+                マッチが成立しました<span class="text-red-500">❤</span>
             </h2>
             <p class="text-center mb-8 font-bold">
                 このユーザーとチャットを開始しますか？
             </p>
-            <div class="space-y-2">
-                <a href="#" class="block w-full bg-blue-500 text-white text-center py-3">
+            <div class="space-y-6">
+                <a href="{{ route('org.chat.index') }}" class="block w-full bg-blue-500 text-white text-center py-3">
                     チャットを開始する
                 </a>
                 <button id="later-match-button" class="w-full bg-gray-200 py-3">

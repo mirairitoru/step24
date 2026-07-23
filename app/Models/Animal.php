@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\DB;
 
 class Animal extends Model
 {
@@ -58,8 +58,59 @@ class Animal extends Model
         return $this->hasMany(Favorite::class);
     }
 
+    public function getIsFavoritedAttribute()
+    {
+        if(!Auth::guard('web')->check()) {
+            return false;
+        }
+
+        return $this->favorites()
+            ->where('user_id', Auth::guard('web')->id())
+            ->whereIn('status', ['pending', 'matched'])
+            ->exists();
+    }
+
     public function matche()
     {
         return $this->hasMany(AdoptionMatch::class);
+    }
+
+    public function images()
+    {
+        return $this->morphMany(
+            Images::class,
+            'imageable'
+        );
+    }
+
+    public function topImage()
+    {
+        return $this->images()->orderBy('sort_order')->first();
+    }
+
+    public function getCanEditAttribute()
+    {
+        return
+            !$this->favorites->contains('status', 'matched') &&
+            !$this->matche->contains(fn ($match) =>
+                in_array($match->status, ['譲渡準備中', '譲渡完了'])
+            );
+    }
+
+    public function canEdit(): bool
+    {
+        $isMatched = $this->favorites()->where('status', 'matched')->exists();
+
+        if($isMatched) {
+            return false;
+        }
+
+        $hasMatch = $this->matche()->whereIn('status', ['譲渡準備中', '譲渡完了'])->exists();
+
+        if($hasMatch) {
+            return false;
+        }
+
+        return true;
     }
 }

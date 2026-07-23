@@ -1,10 +1,17 @@
-<div class="bg-gradient-to-r from-blue-100 to-blue-50 p-6 rounded-lg shadow-md">
+<div class="bg-gradient-to-b from-blue-50 to-orange-100 p-6 rounded-lg shadow-md">
     <div class="bg-white border border-black p-6 rounded-lg">
         <h2 class="font-bold">保護団体情報</h2>
 
         <div class="border-t border-black my-4">
-            <div class="w-full h-60 bg-gray-200 my-4 flex items-center justify-center">
-                画像
+            <div class="w-full h-60 bg-gray-200 my-4 flex rounded overflow-hidden">
+                
+                @if($org->image)
+                    <img src="{{ asset('storage/'.$org->image->path) }}" class="w-full h-auto" alt="プロフィール画像">
+                @else
+                    <div class="w-full h-full flex items-center justify-center">
+                        画像
+                    </div>
+                @endif
             </div>
         </div>
         <div class="space-y-4">

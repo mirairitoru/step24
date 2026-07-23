@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
 
 class AdoptionMatch extends Model
 {
@@ -11,6 +12,7 @@ class AdoptionMatch extends Model
     protected $fillable = [
         'animal_id',
         'user_id',
+        'animal_id',
         'status',
     ];
     
@@ -22,5 +24,10 @@ class AdoptionMatch extends Model
     public function animal()
     {
         return $this->belongsTo(Animal::class);
+    }
+
+    public function chat()
+    {
+        return $this->hasOne(Chat::class,'match_id');
     }
 }

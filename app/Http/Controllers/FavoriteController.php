@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Animal;
 use App\Models\Favorite;
+use App\Notifications\FavoriteNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -45,16 +46,29 @@ class FavoriteController extends Controller
         $favorite->status = 'pending';
         $favorite->save();
 
+        $organization = $animal->organization;
+
+        $organization->notify(
+            new FavoriteNotification(
+                Auth::guard('web')->user(),
+                $animal
+            )
+        );
+
         return back()->with('success', '興味ありに追加しました');
     }
 
     public function index()
     {
-        $favorites = Favorite::with('animal')
-            ->where('user_id', Auth::id())
-            ->whereIn('status', ['pending', 'matched'])
-            ->latest()
-            ->paginate(3);
+        $favorites = Favorite::with([
+            'animal.images' => function($q) {
+                $q->orderBy('sort_order');
+            }
+        ])
+        ->where('user_id', Auth::id())
+        ->whereIn('status', ['pending', 'matched'])
+        ->latest()
+        ->paginate(3);
         return view('favorites.index', compact('favorites'));
     }
 

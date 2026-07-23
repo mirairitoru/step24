@@ -28,6 +28,7 @@ class UpdateOrganizationProfileRequest extends FormRequest
             'location' => 'nullable|string|max:255',
             'activity_description' => 'nullable|string',
             'adoption_summary' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ];
     }
     

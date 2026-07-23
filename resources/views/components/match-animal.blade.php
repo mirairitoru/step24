@@ -12,6 +12,7 @@
     data-comment="{{ $match->animal->comment }}"
     data-role="{{ Auth::guard('web')->check() ? 'user' : (Auth::guard('org')->check() ? 'organization' : 'guest')}}"
     data-favorited="{{ $match->animal->isFavorited ? 'true' : 'false' }}"
+    data-images="{{ json_encode($match->animal->images->map(fn($img) => asset('storage/' .$img->path))) }}"
 >
     詳細情報
 </button>
