@@ -12,7 +12,7 @@
 ・Docker Sail/WSL2
 
 ## ER図
-(./assets/ER図.png)
+![ER図](./assets/ER図.png)
 
 ## 機能一覧
 ・ログイン機能
@@ -32,28 +32,28 @@
 
 ## 画面一覧
 ログイン
-(./assets/ログイン画面.png)
+![ログイン](./assets/ログイン画面.png)
 一覧
-(./assets/user-top1.png)
+![一覧](./assets/user-top1.png)
 検索
-(./assets/user-top2.png)
+![検索](./assets/user-top2.png)
 
 ユーザーマイページ
-(./assets/user-profile.png)
-(./assets/user.png)
+![ユーザーマイページ](./assets/user-profile.png)
+![ユーザーマイページ](./assets/user.png)
 チャット一覧
-(./assets/user-chat.png)
+![チャット一覧](./assets/user-chat.png)
 
 保護団体マイページ
-(./assets/org-mypage1.png)
-(./assets/org-mypage2.png)
+![保護団体マイページ](./assets/org-mypage1.png)
+![保護団体マイページ](./assets/org-mypage2.png)
 
 動物
-(./assets/org-animals.png)
+![動物](./assets/org-animals.png)
 
 マッチ
-(./assets/org-favorition.png)
-(./assets/org-match.png)
+![マッチ](./assets/org-favorition.png)
+![マッチ](./assets/org-match.png)
 
 団体編集
-(./assets/org.png)
+![団体編集](./assets/org.png)
