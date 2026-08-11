@@ -1,12 +1,12 @@
 <div class="w-full">
     <!-- タブ -->
     <div class="mb-4 flex justify-center space-x-24">
-        <button type="button" id="login-btn-user" onclick="switchTab('user')"
+        <button type="button" id="login-btn-user"
             class="tab-btn px-4 pb-3 pt-2 text-[#F56B01] hover:text-[#5293FF] text-xl font-semibold">
             一般ユーザー
         </button>
 
-        <button type="button" id="login-btn-org" onclick="switchTab('org')"
+        <button type="button" id="login-btn-org"
             class="tab-btn px-4 pb-3 pt-2 text-[#F56B01] hover:text-[#5293FF] text-xl font-semibold">
             保護団体
         </button>

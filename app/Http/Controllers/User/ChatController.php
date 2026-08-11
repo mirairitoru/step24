@@ -131,6 +131,9 @@ class ChatController extends Controller
 
     public function store(Request $request, AdoptionMatch $match)
     {
+
+        abort_if($match->user_id !== Auth::guard('web')->id(), 403);
+
         $request->validate([
             'message' => ['required'],
         ]);

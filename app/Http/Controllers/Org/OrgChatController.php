@@ -139,6 +139,9 @@ class OrgChatController extends Controller
 
     public function store(Request $request, AdoptionMatch $match)
     {
+
+        abort_if($match->animal->organization_id !== Auth::guard('org')->id(), 403);
+
         $request->validate([
             'message' => ['required'],
         ]);

@@ -79,6 +79,9 @@ window.switchTab = function(role) {
     }
 };
 
+document.getElementById('login-btn-user').addEventListener('click', () => switchTab('user'));
+document.getElementById('login-btn-org').addEventListener('click', () => switchTab('org'));
+
 // ログインのタブ未選択チェック
 window.checkLoginTabSelected = function() {
     const userBtn = document.getElementById('login-btn-user');
