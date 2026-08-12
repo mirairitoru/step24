@@ -5,7 +5,7 @@
 保護団体は承認後はチャットでのやり取りで譲渡まで行う
 
 ## 使用技術
-・PHP 8.3
+・PHP 8.4
 ・Laravel 13
 ・PostgreSQL
 ・Laravel Breeze
